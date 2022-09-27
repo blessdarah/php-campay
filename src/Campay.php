@@ -158,4 +158,15 @@ class Campay
         $response = $this->client->post($uri, array("form_params" => $params, "headers" => $this->getHeaders()));
         echo $response->getBody();
     }
+
+
+    public function generatePaymentUrl(array $params)
+    {
+        $uri = "get_payment_link/";
+        $response = $this->client->post($uri, array(
+            "form_params" => $params,
+            "headers" => $this->getHeaders()
+        ));
+        echo $response->getBody();
+    }
 }
