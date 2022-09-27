@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/laravel-campay.iml" filepath="$PROJECT_DIR$/.idea/laravel-campay.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../php-campay/.idea/php-campay.iml" filepath="$PROJECT_DIR$/../php-campay/.idea/php-campay.iml" />
     </modules>
   </component>
 </project>

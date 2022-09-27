@@ -4,8 +4,6 @@ namespace BlessDarah\PhpCampay;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Exception\RequestException;
-use Psr\Http\Message\ResponseInterface;
 
 class Campay
 {
@@ -65,8 +63,8 @@ class Campay
     private function request_token()
     {
         $config = [
-            "username" => "9lBc9TNNrF3fgaA16WbSvhNFyWneTPN89EAwdSjCQX7WrQ1ERoNhv6jvTWBCOzwrL9QbePeIHcCY4K4tXmYEAw",
-            "password" => "hAq0q4zLzIo74NQ2dp5afbaYzIvfJqCap3w1klzMvATM3Pw2bhregIxuw7q4cb_P1sx45B6ifkZxBZM0ucJaEw"
+            "username" => $_ENV['CAMPAY_USERNAME'],
+            "password" => $_ENV['CAMPAY_PASSWORD']
         ];
 
         $options = [

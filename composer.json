@@ -14,6 +14,7 @@
     ],
     "require": {
         "guzzlehttp/guzzle": "^7.0",
-        "nesbot/carbon": "^2.62"
+        "nesbot/carbon": "^2.62",
+        "vlucas/phpdotenv": "^5.4"
     }
 }
