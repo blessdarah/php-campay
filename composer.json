@@ -1,0 +1,19 @@
+{
+    "name": "blessdarah/php-campay",
+    "description": "PHP package wrapper for campay momo integration",
+    "autoload": {
+        "psr-4": {
+            "BlessDarah\\PhpCampay\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Bless Darah",
+            "email": "blessdarahuba@gmail.com"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "^7.0",
+        "nesbot/carbon": "^2.62"
+    }
+}
