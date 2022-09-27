@@ -2,8 +2,19 @@
 
 This is a php wrapper for the campay API that enables a seemless integration of momo with PHP and Campay.
 
+## Requirements
+
+This package works as from `php@7.4` and above. Ensure that you have the latest version of php
+installed.
+
 ## How to install this package
 To install this package, run:
+
+```bash
+composer require blessdarah/php-campay:dev-main
+```
+
+Use the command below when the package is stable.
 ```bash
 composer require blessdarah/php-campay
 ```
@@ -11,6 +22,38 @@ composer require blessdarah/php-campay
 ## Usage
 
 The package automatically manages your tokens for all transactions with campay.
+
+### Configuration
+
+This packages uses the `dotenv` package and thus if you're not using something like laravel which automatically loads
+env variables, you can set it up like this:
+
+1. Create a `.env` file in the root of your project if you don't already have one
+2. Copy your application `username` and `password` from your campay dashboard and add them like this:
+```bash
+CAMPAY_USERNAME="YOUR CAMPAY APPLICATION USERNAME"
+CAMPAY_PASSWORD="YOUR CAMPAY APPLICATION PASSWORD"
+```
+
+3. In your `index.php` file or your root application entry point, you have to load up the `dotenv` package
+```bash
+require_once "vendor/autoload.php";
+use BlessDarah\PhpCampay\Campay;
+use Dotenv\Dotenv;
+
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+```
+
+If you're not using composer, you can ignore the above steps and set up your `.env` vars using the php global `$_ENV` to setup your campay
+configurations in the location you want as follows:
+```bash
+$_ENV['CAMPAY_USERNAME']="YOUR CAMPAY APPLICATION USERNAME"
+$_ENV['CAMPAY_PASSWORD']="YOUR CAMPAY APPLICATION PASSWORD"
+```
+
+> **Remark**: You should make sure that you don't expose your config variables
+> online as it will be a potential security issue for your application
 
 ### Collect payment
 ```php
@@ -113,4 +156,33 @@ $start_date = new Date("2022-06-13");
 $end_date = new Date("2022-08-13");
 
 $res = $campay->transactionHistory($start_date, $end_date);
+```
+
+
+### Generate payment link
+
+As per the campay documentation, you can generate a payment link or url that can be utilized 
+for payments. Here's how you do it:
+
+```php
+use BlessDarah\PhpCampay\Campay;
+
+$campay = new Campay();
+
+$params = [
+    "amount" => 4,
+    "currency" => "XAF",
+    "description" => "Sample description",
+    "first_name" =>  "John",
+    "last_name" =>  "Doe",
+    "email" => "example@mail.com",
+    "external_reference" =>  "",
+    "redirect_url" =>  "https://example.com",
+    "failure_redirect_url" => "https://example.com",
+    "payment_options" => "MOMO"
+];
+$res = $campay->generatePaymentUrl($params);
+
+// handle your response data from here 
+echo $res;
 ```
