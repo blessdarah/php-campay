@@ -137,7 +137,7 @@ class Campay
      * @return void
      * @throws GuzzleException
      */
-    public function transactionHistoy($start = null, $end = null)
+    public function transactionHistory($start = null, $end = null)
     {
         $uri = "history/";
         $date = new Carbon();

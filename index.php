@@ -23,6 +23,6 @@ $ref = "b1d44bc7-648d-451b-a3ef-c58d7438ec82";
 
 $campay->getAppBalance();
 
-$campay->transactionHistoy();
+$campay->transactionHistory();
 
 //$campay->collect($data);
