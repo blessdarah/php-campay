@@ -16,5 +16,13 @@
         "guzzlehttp/guzzle": "^7.0",
         "nesbot/carbon": "^2.62",
         "vlucas/phpdotenv": "^5.4"
+    },
+    "require-dev": {
+        "pestphp/pest": "^1.22"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     }
 }

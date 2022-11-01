@@ -160,6 +160,11 @@ class Campay
     }
 
 
+    /**
+     * @param array $params
+     * @return void
+     * @throws GuzzleException
+     */
     public function generatePaymentUrl(array $params)
     {
         $uri = "get_payment_link/";
