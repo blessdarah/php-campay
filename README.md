@@ -8,6 +8,7 @@ This package works as from `php@7.4` and above. Ensure that you have the latest 
 installed.
 
 ## How to install this package
+
 To install this package, run:
 
 ```bash
@@ -15,6 +16,7 @@ composer require blessdarah/php-campay:dev-main
 ```
 
 Use the command below when the package is stable.
+
 ```bash
 composer require blessdarah/php-campay
 ```
@@ -30,12 +32,14 @@ env variables, you can set it up like this:
 
 1. Create a `.env` file in the root of your project if you don't already have one
 2. Copy your application `username` and `password` from your campay dashboard and add them like this:
+
 ```bash
 CAMPAY_USERNAME="YOUR CAMPAY APPLICATION USERNAME"
 CAMPAY_PASSWORD="YOUR CAMPAY APPLICATION PASSWORD"
 ```
 
 3. In your `index.php` file or your root application entry point, you have to load up the `dotenv` package
+
 ```bash
 require_once "vendor/autoload.php";
 use BlessDarah\PhpCampay\Campay;
@@ -47,6 +51,7 @@ $dotenv->load();
 
 If you're not using composer, you can ignore the above steps and set up your `.env` vars using the php global `$_ENV` to setup your campay
 configurations in the location you want as follows:
+
 ```bash
 $_ENV['CAMPAY_USERNAME']="YOUR CAMPAY APPLICATION USERNAME"
 $_ENV['CAMPAY_PASSWORD']="YOUR CAMPAY APPLICATION PASSWORD"
@@ -56,6 +61,7 @@ $_ENV['CAMPAY_PASSWORD']="YOUR CAMPAY APPLICATION PASSWORD"
 > online as it will be a potential security issue for your application
 
 ### Collect payment
+
 ```php
 use BlessDarah\PhpCampay\Campay;
 
@@ -68,13 +74,14 @@ $data = array(
     "description" => "test payment"
 );
 $res = $campay->collect($data);
-// handle your response data from here 
+// handle your response data from here
 echo $res;
 ```
 
-
 ### Withdraw funds
+
 For withdrawal, we use the **widthdraw** function
+
 ```php
 use BlessDarah\PhpCampay\Campay;
 
@@ -90,9 +97,11 @@ $res = $campay->widthdraw($data);
 echo $res;
 
 ```
+
 The above response contains the info and the `reference` for your transaction that will enable you check its status using the `getTransactionStatus` function
 
 ### Check transaction status
+
 For checking transaction status after using the `collect` or the `widthdraw` functions,
 you can pass the resulting reference key in order to check your transaction status
 
@@ -133,12 +142,12 @@ use BlessDarah\PhpCampay\Campay;
 $campay = new Campay();
 $res = $campay->getAppBalance();
 
-// handle your response data from here 
+// handle your response data from here
 echo $res;
 ```
 
-
 ### Get transaction history with an interval
+
 By default, your transaction history will return all your app's transactions for the past **7 days** or past week
 
 ```php
@@ -147,10 +156,12 @@ use BlessDarah\PhpCampay\Campay;
 $campay = new Campay();
 $res = $campay->transactionHistory();
 
-// handle your response data from here 
+// handle your response data from here
 echo $res;
 ```
+
 If you want the dates to be specific, you can pass your `start` and `end` dates like so:
+
 ```php
 $start_date = new Date("2022-06-13");
 $end_date = new Date("2022-08-13");
@@ -158,10 +169,9 @@ $end_date = new Date("2022-08-13");
 $res = $campay->transactionHistory($start_date, $end_date);
 ```
 
-
 ### Generate payment link
 
-As per the campay documentation, you can generate a payment link or url that can be utilized 
+As per the campay documentation, you can generate a payment link or url that can be utilized
 for payments. Here's how you do it:
 
 ```php
@@ -179,10 +189,10 @@ $params = [
     "external_reference" =>  "",
     "redirect_url" =>  "https://example.com",
     "failure_redirect_url" => "https://example.com",
-    "payment_options" => "MOMO"
+    "payment_options" => "MOMO" // or CARD for credit card payments
 ];
 $res = $campay->generatePaymentUrl($params);
 
-// handle your response data from here 
+// handle your response data from here
 echo $res;
 ```

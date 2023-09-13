@@ -12,12 +12,12 @@ test("expect token to be fetched upon creating new campay object", function () {
     expect($model->getToken())->toBeString();
 });
 
-test("should fail if user collection information is wrong", function(){
-try {
-    $model = new Campay();
-   $model->collect([]);
-    
-}catch(Exception $e){
-    throw new Exception($e->getMessage());
-}
+test("should fail if user collection information is wrong", function () {
+    try {
+        $model = new Campay();
+        $model->collect([]);
+
+    } catch(Exception $e) {
+        throw new Exception($e->getMessage());
+    }
 })->throws(Exception::class, "Bad request");

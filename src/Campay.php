@@ -1,4 +1,5 @@
 <?php
+
 namespace BlessDarah\PhpCampay;
 
 use Carbon\Carbon;
@@ -71,7 +72,7 @@ class Campay
             "form_params" => $config
         ];
 
-        $response = $this->client->post('token/',$options);
+        $response = $this->client->post('token/', $options);
         $data = json_decode($response->getBody());
         $this->setHeaders([
             "Authorization" => "Token " . $data->token
@@ -85,7 +86,7 @@ class Campay
      * @return void
      * @throws GuzzleException
      */
-    public function collect(array $data)
+    public function collect(array $data): void
     {
         $uri = "collect/";
         $response = $this->client->post($uri, array("form_params" => $data, "headers" => $this->getHeaders()));
@@ -141,12 +142,11 @@ class Campay
     {
         $uri = "history/";
         $date = new Carbon();
-        if(!isset($start)){
+        if(!isset($start)) {
             $start = $date->subWeek()->format('Y-m-d');
         }
 
-        if(!isset($end))
-        {
+        if(!isset($end)) {
             $end = Carbon::now()->format('Y-m-d');
         }
 
@@ -165,7 +165,7 @@ class Campay
      * @return void
      * @throws GuzzleException
      */
-    public function generatePaymentUrl(array $params)
+    public function generatePaymentUrl(array $params): void
     {
         $uri = "get_payment_link/";
         $response = $this->client->post($uri, array(
