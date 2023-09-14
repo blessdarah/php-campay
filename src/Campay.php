@@ -19,7 +19,7 @@ class Campay
     {
         $this->client = new Client([
             'base_uri' => $base_url,
-            'timeout' => 2.0
+            'timeout' => 30 // 30 sec timeout
         ]);
 
         $this->token = $this->request_token();
@@ -90,7 +90,7 @@ class Campay
     {
         $uri = "collect/";
         $response = $this->client->post($uri, array("form_params" => $data, "headers" => $this->getHeaders()));
-        echo $response->getBody();
+        return $response->getBody();
     }
 
     /**
@@ -104,7 +104,7 @@ class Campay
         $response = $this->client->get($uri, [
             "headers" => $this->getHeaders()
         ]);
-        echo $response->getBody();
+        return $response->getBody();
     }
 
     /**
@@ -116,7 +116,7 @@ class Campay
     {
         $uri = "withdraw/";
         $response = $this->client->post($uri, array("form_params" => $data, "headers" => $this->getHeaders()));
-        echo $response->getBody();
+        return $response->getBody();
     }
 
 
@@ -128,7 +128,7 @@ class Campay
     {
         $uri = "balance/";
         $response = $this->client->get($uri, array("headers" => $this->getHeaders()));
-        echo $response->getBody();
+        return $response->getBody();
     }
 
 
@@ -156,7 +156,7 @@ class Campay
         ];
 
         $response = $this->client->post($uri, array("form_params" => $params, "headers" => $this->getHeaders()));
-        echo $response->getBody();
+        return $response->getBody();
     }
 
 
@@ -165,13 +165,13 @@ class Campay
      * @return void
      * @throws GuzzleException
      */
-    public function generatePaymentUrl(array $params): void
+    public function generatePaymentUrl(array $params)
     {
         $uri = "get_payment_link/";
         $response = $this->client->post($uri, array(
             "form_params" => $params,
             "headers" => $this->getHeaders()
         ));
-        echo $response->getBody();
+        return $response->getBody();
     }
 }
