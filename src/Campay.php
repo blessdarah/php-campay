@@ -27,6 +27,7 @@ class Campay
 
     /**
      * @param array $headers
+     * @returns void
      */
     public function setHeaders(array $headers): void
     {
@@ -51,6 +52,7 @@ class Campay
 
     /**
      * @param string $token
+     * @returns void
      */
     public function setToken(string $token): void
     {
@@ -83,10 +85,9 @@ class Campay
 
     /**
      * @param array $data
-     * @return void
      * @throws GuzzleException
      */
-    public function collect(array $data): void
+    public function collect(array $data)
     {
         $uri = "collect/";
         $response = $this->client->post($uri, array("form_params" => $data, "headers" => $this->getHeaders()));
@@ -95,7 +96,6 @@ class Campay
 
     /**
      * @param string $reference
-     * @return void
      * @throws GuzzleException
      */
     public function getTransactionStatus(string $reference)
@@ -109,7 +109,6 @@ class Campay
 
     /**
      * @param array $data
-     * @return void
      * @throws GuzzleException
      */
     public function withdraw(array $data)
@@ -121,7 +120,6 @@ class Campay
 
 
     /**
-     * @return void
      * @throws GuzzleException
      */
     public function getAppBalance()
@@ -135,7 +133,6 @@ class Campay
     /**
      * @param $start
      * @param $end
-     * @return void
      * @throws GuzzleException
      */
     public function transactionHistory($start = null, $end = null)
@@ -162,7 +159,6 @@ class Campay
 
     /**
      * @param array $params
-     * @return void
      * @throws GuzzleException
      */
     public function generatePaymentUrl(array $params)
