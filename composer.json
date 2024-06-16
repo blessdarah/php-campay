@@ -18,11 +18,11 @@
     ],
     "require": {
         "guzzlehttp/guzzle": "^7.0",
-        "nesbot/carbon": "^2.62",
+        "nesbot/carbon": "^3.5",
         "vlucas/phpdotenv": "^5.4"
     },
     "require-dev": {
-        "pestphp/pest": "^1.22"
+        "pestphp/pest": "^2.34"
     },
     "config": {
         "allow-plugins": {
