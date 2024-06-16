@@ -7,7 +7,7 @@
             "BlessDarah\\PhpCampay\\": "src/"
         }
     },
-    "min-stabilty": "stable",
+    "minimum-stabilty": "stable",
     "license": "MIT",
     "authors": [
         {
