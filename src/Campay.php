@@ -17,7 +17,7 @@ class Campay
     /**
      * constructor
      */
-    public function __construct($base_url = 'https://demo.campay.net/api/')
+    public function __construct($base_url = $_ENV['CAMPAY_BASE_URI'])
     {
         $this->client = new Client([
             'base_uri' => $base_url,
