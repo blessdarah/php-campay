@@ -57,6 +57,12 @@ $_ENV['CAMPAY_USERNAME']="YOUR CAMPAY APPLICATION USERNAME"
 $_ENV['CAMPAY_PASSWORD']="YOUR CAMPAY APPLICATION PASSWORD"
 ```
 
+Configure campay base url 
+```bash
+$_ENV['CAMPAY_BASE_URL']="https://demo.campay.net/api/" # for local testing or
+$_ENV['CAMPAY_BASE_URL']="https://campay.net/api/" # for production
+```
+
 > **Remark**: You should make sure that you don't expose your config variables
 > online as it will be a potential security issue for your application
 
