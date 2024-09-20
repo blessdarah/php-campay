@@ -15,9 +15,12 @@ class Campay
     private Client $client;
 
     /**
-     * constructor
+     * Create a new campay instance
+     *
+     * @param string $base_url - Set the base uri or pull from the env by default
+     * @return void
      */
-    public function __construct($base_url = $_ENV['CAMPAY_BASE_URI'])
+    public function __construct(string $base_url = $_ENV['CAMPAY_BASE_URI'])
     {
         $this->client = new Client([
             'base_uri' => $base_url,
@@ -28,14 +31,17 @@ class Campay
     }
 
     /**
+     * Set headers required by Campay
+     *
+     * @param array $headers - The set of headers
      * @returns void
      */
-    public function setHeaders(array $headers): void
+    private function setHeaders(array $headers): void
     {
         $this->headers = $headers;
     }
 
-    public function getHeaders(): array
+    private function getHeaders(): array
     {
         return $this->headers;
     }
@@ -46,19 +52,23 @@ class Campay
     }
 
     /**
+     * Set the token to be use for every request
+     *
+     * @param string $token
      * @returns void
      */
-    public function setToken(string $token): void
+    protected function setToken(string $token): void
     {
         $this->token = $token;
     }
 
     /**
-     * @return mixed
+     * Request a token from campay
      *
      * @throws GuzzleException
+     * @return string
      */
-    private function request_token()
+    private function request_token(): string
     {
         $config = [
             'username' => $_ENV['CAMPAY_USERNAME'],
@@ -79,9 +89,13 @@ class Campay
     }
 
     /**
+     * Launches collection from user via USSD
+     *
+     * @param array $data - the collection data
      * @throws GuzzleException
+     * @return string - The request body
      */
-    public function collect(array $data)
+    public function collect(array $data): string
     {
         $uri = 'collect/';
         $response = $this->client->post($uri, ['form_params' => $data, 'headers' => $this->getHeaders()]);
@@ -90,7 +104,12 @@ class Campay
     }
 
     /**
+     * Gets the status of a specific transaction
+     *
+     * @param string $reference - The transaction reference
      * @throws GuzzleException
+     *
+     * @return string "SUCCESSFUL" | "PENDING" | "CANCELED" - the transaction status
      */
     public function getTransactionStatus(string $reference)
     {
@@ -103,7 +122,11 @@ class Campay
     }
 
     /**
+     * Trigger a withdrawal request
+     *
+     * @param array $data - the client information
      * @throws GuzzleException
+     * @return string - the withdrawal data
      */
     public function withdraw(array $data)
     {
@@ -126,8 +149,10 @@ class Campay
 
     /**
      * @throws GuzzleException
+     * @param $start - The start date of the transaction
+     * @param $end - The end date of the transaction
      */
-    public function transactionHistory($start = null, $end = null)
+    public function transactionHistory(string $start = null, string $end = null)
     {
         $uri = 'history/';
         $date = new Carbon();
