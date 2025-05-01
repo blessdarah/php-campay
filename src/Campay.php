@@ -5,11 +5,15 @@ namespace BlessDarah\PhpCampay;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use Psr\Http\Message\StreamInterface;
 
 class Campay
 {
     private string $token;
 
+    /*
+     * @var array<string, string> $headers
+     * */
     private array $headers;
 
     private Client $client;
@@ -33,7 +37,7 @@ class Campay
     /**
      * Set headers required by Campay
      *
-     * @param array $headers - The set of headers
+     * @param array<string, string> $headers - The set of headers
      * @returns void
      */
     private function setHeaders(array $headers): void
@@ -41,11 +45,19 @@ class Campay
         $this->headers = $headers;
     }
 
+    /*
+     * Get the set headers
+     * @return array<string, string>
+     * */
     private function getHeaders(): array
     {
         return $this->headers;
     }
 
+    /*
+     * Returns the Campay Token
+     * @return string
+     * */
     public function getToken(): string
     {
         return $this->token;
@@ -91,7 +103,7 @@ class Campay
     /**
      * Launches collection from user via USSD
      *
-     * @param array $data - the collection data
+     * @param array<string, mixed> $data - the collection data
      * @throws GuzzleException
      * @return string - The request body
      */
@@ -124,7 +136,7 @@ class Campay
     /**
      * Trigger a withdrawal request
      *
-     * @param array $data - the client information
+     * @param array<string, mixed> $data - the client information
      * @throws GuzzleException
      * @return string - the withdrawal data
      */
@@ -137,9 +149,10 @@ class Campay
     }
 
     /**
+     * Get application balance
      * @throws GuzzleException
      */
-    public function getAppBalance()
+    public function getAppBalance(): string
     {
         $uri = 'balance/';
         $response = $this->client->get($uri, ['headers' => $this->getHeaders()]);
@@ -152,7 +165,7 @@ class Campay
      * @param $start - The start date of the transaction
      * @param $end - The end date of the transaction
      */
-    public function transactionHistory(string $start = null, string $end = null)
+    public function transactionHistory(string $start = null, string $end = null): string
     {
         $uri = 'history/';
         $date = new Carbon();
@@ -175,9 +188,11 @@ class Campay
     }
 
     /**
+     * Generate a payment URL to be used
+     * @param array<string, mixed> $params
      * @throws GuzzleException
      */
-    public function generatePaymentUrl(array $params)
+    public function generatePaymentUrl(array $params): StreamInterface
     {
         $uri = 'get_payment_link/';
         $response = $this->client->post($uri, [
