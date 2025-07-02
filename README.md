@@ -86,7 +86,7 @@ echo $res;
 
 ### Withdraw funds
 
-For withdrawal, we use the **widthdraw** function
+For withdrawal, we use the **withdraw** function
 
 ```php
 use BlessDarah\PhpCampay\Campay;
@@ -99,7 +99,7 @@ $data = array(
     "to" => "237******",
     "description" => "test payment"
 );
-$res = $campay->widthdraw($data);
+$res = $campay->withdraw($data);
 echo $res;
 
 ```
@@ -108,7 +108,7 @@ The above response contains the info and the `reference` for your transaction th
 
 ### Check transaction status
 
-For checking transaction status after using the `collect` or the `widthdraw` functions,
+For checking transaction status after using the `collect` or the `withdraw` functions,
 you can pass the resulting reference key in order to check your transaction status
 
 ```php
