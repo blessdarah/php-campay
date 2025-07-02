@@ -4,5 +4,8 @@ vendor/
 composer.lock
 webhook.php
 .php-code
-.*.cache
+.php-cs-fixer.cache
+.phpunit.result.cache
+.claude/
+.copilot/
 
