@@ -3,4 +3,9 @@ vendor/
 .env
 composer.lock
 webhook.php
+.php-code
+.php-cs-fixer.cache
+.phpunit.result.cache
+.claude/
+.copilot/
 
