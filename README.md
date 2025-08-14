@@ -12,12 +12,6 @@ installed.
 To install this package, run:
 
 ```bash
-composer require blessdarah/php-campay:dev-main
-```
-
-Use the command below when the package is stable.
-
-```bash
 composer require blessdarah/php-campay
 ```
 
