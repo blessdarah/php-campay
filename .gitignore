@@ -9,3 +9,5 @@ webhook.php
 .claude/
 .copilot/
 
+.phpunit.cache/
+*.bak

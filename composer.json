@@ -1,14 +1,9 @@
 {
     "name": "blessdarah/php-campay",
     "description": "PHP package wrapper for campay momo integration",
-    "version": "1.0.0",
-    "autoload": {
-        "psr-4": {
-            "BlessDarah\\PhpCampay\\": "src/"
-        }
-    },
-    "minimum-stabilty": "stable",
+    "type": "library",
     "license": "MIT",
+    "keywords": ["campay", "momo", "mobile money", "payments", "cameroon"],
     "authors": [
         {
             "name": "Bless Darah",
@@ -17,15 +12,28 @@
         }
     ],
     "require": {
-        "guzzlehttp/guzzle": "^7.0",
-        "nesbot/carbon": "^3.5",
-        "vlucas/phpdotenv": "^5.4"
+        "php": "^8.4",
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^8.2"
     },
     "require-dev": {
-        "pestphp/pest": "^2.34",
-        "phpstan/phpstan": "^1.12"
+        "pestphp/pest": "^5.3",
+        "phpstan/phpstan": "^2.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "BlessDarah\\PhpCampay\\": "src/"
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "scripts": {
+        "test": "pest",
+        "analyse": "phpstan analyse",
+        "audit": "composer audit"
     },
     "config": {
+        "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true
         }
