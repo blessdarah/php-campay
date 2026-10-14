@@ -1,21 +1,14 @@
 # PHP Campay
 
-This is a php wrapper for the campay API that enables a seemless integration of momo with PHP and Campay.
+A PHP wrapper for the [Campay](https://campay.net) API that makes it easy to integrate Mobile Money payments into your PHP application.
 
 ## Requirements
 
-This package works as from `php@7.4` and above. Ensure that you have the latest version of php
-installed.
+- PHP `8.4` or newer
+- `ext-json`
+- [Guzzle](https://docs.guzzlephp.org) `8.x` (installed automatically)
 
-## How to install this package
-
-To install this package, run:
-
-```bash
-composer require blessdarah/php-campay:dev-main
-```
-
-Use the command below when the package is stable.
+## Installation
 
 ```bash
 composer require blessdarah/php-campay
@@ -23,182 +16,174 @@ composer require blessdarah/php-campay
 
 ## Usage
 
-The package automatically manages your tokens for all transactions with campay.
+The package automatically requests a token, caches it on the instance, and refreshes it once if Campay reports it expired.
 
 ### Configuration
 
-This packages uses the `dotenv` package and thus if you're not using something like laravel which automatically loads
-env variables, you can set it up like this:
+Pass your application credentials (from your Campay dashboard) and the API base URL to the constructor:
 
-1. Create a `.env` file in the root of your project if you don't already have one
-2. Copy your application `username` and `password` from your campay dashboard and add them like this:
-
-```bash
-CAMPAY_USERNAME="YOUR CAMPAY APPLICATION USERNAME"
-CAMPAY_PASSWORD="YOUR CAMPAY APPLICATION PASSWORD"
-```
-
-3. In your `index.php` file or your root application entry point, you have to load up the `dotenv` package
-
-```bash
-require_once "vendor/autoload.php";
+```php
 use BlessDarah\PhpCampay\Campay;
-use Dotenv\Dotenv;
 
-$dotenv = Dotenv::createImmutable(__DIR__);
-$dotenv->load();
+$campay = new Campay(
+    username: getenv('CAMPAY_USERNAME'),
+    password: getenv('CAMPAY_PASSWORD'),
+    baseUrl: Campay::DEMO_BASE_URL, // or Campay::LIVE_BASE_URL in production
+);
 ```
 
-If you're not using composer, you can ignore the above steps and set up your `.env` vars using the php global `$_ENV` to setup your campay
-configurations in the location you want as follows:
+Load the credentials however your application manages secrets (environment variables, a secrets manager, your framework's config). The package never reads `.env` files or `$_ENV` itself.
 
-```bash
-$_ENV['CAMPAY_USERNAME']="YOUR CAMPAY APPLICATION USERNAME"
-$_ENV['CAMPAY_PASSWORD']="YOUR CAMPAY APPLICATION PASSWORD"
+> **Security notes**
+>
+> - Never commit your credentials or expose them to the browser.
+> - The base URL must use `https://`. Plain `http://` URLs are rejected so credentials and tokens are never sent in clear text.
+> - Redirects are not followed, TLS verification is always on, and requests time out after 30 seconds.
+
+You can pass your own Guzzle client as the fourth argument (useful for testing or adding middleware). The package still enforces its own base URL and secure request options.
+
+### Responses and errors
+
+Every API method returns the raw JSON response body as a string:
+
+```php
+$response = json_decode($campay->getAppBalance(), true, flags: JSON_THROW_ON_ERROR);
 ```
 
-Configure campay base url 
-```bash
-$_ENV['CAMPAY_BASE_URL']="https://demo.campay.net/api/" # for local testing or
-$_ENV['CAMPAY_BASE_URL']="https://campay.net/api/" # for production
-```
+Errors are thrown as exceptions that all extend `BlessDarah\PhpCampay\Exceptions\CampayException`:
 
-> **Remark**: You should make sure that you don't expose your config variables
-> online as it will be a potential security issue for your application
+| Exception                 | When                                                        |
+| ------------------------- | ----------------------------------------------------------- |
+| `ValidationException`     | Invalid input, checked before any request is sent           |
+| `AuthenticationException` | Campay rejected the credentials or returned no token        |
+| `ApiException`            | HTTP error, network failure, or an invalid response from Campay |
+| `CampayException`         | Invalid configuration (missing credentials, non-https base URL) |
+
+```php
+use BlessDarah\PhpCampay\Exceptions\CampayException;
+
+try {
+    $response = $campay->collect($data);
+} catch (CampayException $e) {
+    // log $e and show a generic error to your user
+}
+```
 
 ### Collect payment
 
 ```php
-use BlessDarah\PhpCampay\Campay;
-
-$campay = new Campay();
-
-$data = array(
-    "amount" => 3,
-    "currency" => "XAF",
-    "from" => "237******",
-    "description" => "test payment"
-);
-$res = $campay->collect($data);
-// handle your response data from here
-echo $res;
+$response = $campay->collect([
+    'amount' => 3,
+    'currency' => 'XAF',
+    'from' => '237******',
+    'description' => 'test payment',
+]);
 ```
 
 ### Withdraw funds
 
-For withdrawal, we use the **withdraw** function
-
 ```php
-use BlessDarah\PhpCampay\Campay;
-
-$campay = new Campay();
-
-$data = array(
-    "amount" => 3,
-    "currency" => "XAF",
-    "to" => "237******",
-    "description" => "test payment"
-);
-$res = $campay->withdraw($data);
-echo $res;
-
+$response = $campay->withdraw([
+    'amount' => 3,
+    'currency' => 'XAF',
+    'to' => '237******',
+    'description' => 'test payment',
+]);
 ```
 
-The above response contains the info and the `reference` for your transaction that will enable you check its status using the `getTransactionStatus` function
+The response contains the `reference` of your transaction, which you can use to check its status.
 
 ### Check transaction status
 
-For checking transaction status after using the `collect` or the `withdraw` functions,
-you can pass the resulting reference key in order to check your transaction status
-
 ```php
-use BlessDarah\PhpCampay\Campay;
+$collection = json_decode($campay->collect($data), true, flags: JSON_THROW_ON_ERROR);
 
-$campay = new Campay();
+$status = json_decode(
+    $campay->getTransactionStatus($collection['reference']), // e.g: b1d44bc7-648d-451b-a3ef-c5807738ec82
+    true,
+    flags: JSON_THROW_ON_ERROR,
+);
 
-/*
-* Suppose you have carried out a collection request from user then you can
-* collection logic here
-* /
-$ref = $res->reference; // e.g: b1d44bc7-648d-451b-a3ef-c5807738ec82
-
-$transaction_feedback = $campay->getTransactionStatus($ref) /* your reference code */
-
-if($transaction_feedback->status == 'SUCCESSFUL')
-{
-    /* success logic here */
-}
-
-if($transaction_feedback->status == 'PENDING')
-{
-    /* Pending logic here */
-}
-
-if($transaction_feedback->status == 'FAILED')
-{
-    /* Erro logic here */
+switch ($status['status']) {
+    case 'SUCCESSFUL':
+        // success logic
+        break;
+    case 'PENDING':
+        // pending logic
+        break;
+    case 'FAILED':
+        // error logic
+        break;
 }
 ```
+
+References may only contain letters, numbers, `-` and `_`. Anything else throws a `ValidationException`.
 
 ### Get your application balance
 
 ```php
-use BlessDarah\PhpCampay\Campay;
-
-$campay = new Campay();
-$res = $campay->getAppBalance();
-
-// handle your response data from here
-echo $res;
+$response = $campay->getAppBalance();
 ```
 
-### Get transaction history with an interval
+### Get transaction history
 
-By default, your transaction history will return all your app's transactions for the past **7 days** or past week
+By default, this returns your app's transactions for the past **7 days**:
 
 ```php
-use BlessDarah\PhpCampay\Campay;
-
-$campay = new Campay();
-$res = $campay->transactionHistory();
-
-// handle your response data from here
-echo $res;
+$response = $campay->transactionHistory();
 ```
 
-If you want the dates to be specific, you can pass your `start` and `end` dates like so:
+You can pass specific dates as `YYYY-MM-DD` strings or `DateTimeInterface` objects:
 
 ```php
-$start_date = new Date("2022-06-13");
-$end_date = new Date("2022-08-13");
-
-$res = $campay->transactionHistory($start_date, $end_date);
+$response = $campay->transactionHistory('2022-06-13', new DateTimeImmutable('2022-08-13'));
 ```
 
 ### Generate payment link
 
-As per the campay documentation, you can generate a payment link or url that can be utilized
-for payments. Here's how you do it:
+```php
+$response = $campay->generatePaymentUrl([
+    'amount' => 4,
+    'currency' => 'XAF',
+    'description' => 'Sample description',
+    'first_name' => 'John',
+    'last_name' => 'Doe',
+    'email' => 'example@mail.com',
+    'external_reference' => '',
+    'redirect_url' => 'https://example.com',
+    'failure_redirect_url' => 'https://example.com',
+    'payment_options' => 'MOMO', // or CARD for credit card payments
+]);
+```
+
+`redirect_url` and `failure_redirect_url` must be `https://` URLs.
+
+### Handling webhooks
+
+Campay notifies your webhook URL when a transaction completes. Treat the payload as untrusted input:
 
 ```php
-use BlessDarah\PhpCampay\Campay;
+$reference = $_GET['reference'] ?? '';
 
-$campay = new Campay();
+// Never echo request data back, and never trust the reported status on its own.
+// Confirm it with Campay before fulfilling the order:
+$status = json_decode($campay->getTransactionStatus($reference), true, flags: JSON_THROW_ON_ERROR);
 
-$params = [
-    "amount" => 4,
-    "currency" => "XAF",
-    "description" => "Sample description",
-    "first_name" =>  "John",
-    "last_name" =>  "Doe",
-    "email" => "example@mail.com",
-    "external_reference" =>  "",
-    "redirect_url" =>  "https://example.com",
-    "failure_redirect_url" => "https://example.com",
-    "payment_options" => "MOMO" // or CARD for credit card payments
-];
-$res = $campay->generatePaymentUrl($params);
+if ($status['status'] === 'SUCCESSFUL') {
+    // mark the order as paid (idempotently)
+}
 
-// handle your response data from here
-echo $res;
+http_response_code(200);
 ```
+
+## Development
+
+```bash
+composer test     # run the test suite
+composer analyse  # run PHPStan
+composer audit    # check dependencies for known vulnerabilities
+```
+
+## Upgrading from 1.x
+
+See [CHANGELOG.md](CHANGELOG.md).
