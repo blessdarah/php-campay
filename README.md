@@ -8,7 +8,9 @@ A PHP wrapper for the [Campay](https://campay.net) API that makes it easy to int
 - `ext-json`
 - [Guzzle](https://docs.guzzlephp.org) `8.x` (installed automatically)
 
-## Installation
+## How to install this package
+
+To install this package, run:
 
 ```bash
 composer require blessdarah/php-campay
