@@ -160,21 +160,51 @@ $response = $campay->generatePaymentUrl([
 
 ### Handling webhooks
 
-Campay notifies your webhook URL when a transaction completes. Treat the payload as untrusted input:
+Campay notifies the callback URL set on your app in the Campay dashboard when a transaction becomes `SUCCESSFUL` or `FAILED`. Depending on your app settings, it sends a `GET` request with query parameters or a `POST` request with a JSON body.
+
+Each notification carries a `signature`, which is an HS256 JWT signed with your app's **Webhook Key** (found in the Campay dashboard). `CampayWebhook` checks the signature and gives you a typed `WebhookEvent`:
 
 ```php
-$reference = $_GET['reference'] ?? '';
+use BlessDarah\PhpCampay\Campay;
+use BlessDarah\PhpCampay\CampayWebhook;
+use BlessDarah\PhpCampay\Exceptions\CampayException;
+use BlessDarah\PhpCampay\Exceptions\InvalidWebhookException;
 
-// Never echo request data back, and never trust the reported status on its own.
-// Confirm it with Campay before fulfilling the order:
-$status = json_decode($campay->getTransactionStatus($reference), true, flags: JSON_THROW_ON_ERROR);
+$webhook = new CampayWebhook(getenv('CAMPAY_WEBHOOK_KEY'));
 
-if ($status['status'] === 'SUCCESSFUL') {
-    // mark the order as paid (idempotently)
+try {
+    // GET callbacks
+    $event = $webhook->parse($_GET);
+    // POST callbacks
+    // $event = $webhook->parseJson(file_get_contents('php://input'));
+
+    $order = findOrderByReference($event->externalReference); // your own lookup
+
+    // Confirm with Campay that the transaction really has this status and amount
+    $campay->confirmTransaction($event, expectedAmount: $order->amount);
+} catch (InvalidWebhookException $e) {
+    http_response_code(400);
+    exit;
+} catch (CampayException $e) {
+    http_response_code(503); // e.g. Campay could not be reached, let it retry
+    exit;
+}
+
+if ($event->isSuccessful() && !$order->isPaid()) {
+    $order->markAsPaid($event->reference); // process each reference only once
+} elseif ($event->isFailed()) {
+    // $event->reason explains why
 }
 
 http_response_code(200);
 ```
+
+> **Why `confirmTransaction()`?** A valid signature proves the request came from Campay, but Campay
+> does not document that the token covers the other fields (status, amount, ...). Always confirm
+> the transaction with the API, and compare it with the amount your order expects, before
+> fulfilling it. Never echo webhook data back in the response.
+
+`WebhookEvent` exposes `status`, `reference`, `amount`, `currency`, `operator`, `code`, `operatorReference`, `endpoint`, `externalReference`, `externalUser`, `phoneNumber`, `description`, `reason` and `appAmount`. It also keeps every field Campay sent (except the signature) in `$event->data`.
 
 ## Development
 

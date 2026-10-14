@@ -19,6 +19,8 @@
 
 ### Added
 
+- Webhook support: `CampayWebhook` verifies the HS256 `signature` with your app's webhook key and parses GET or POST callbacks into a `WebhookEvent`. Invalid callbacks throw `InvalidWebhookException`.
+- `Campay::confirmTransaction()` checks a webhook against the Campay API (reference, status and amount, plus an optional expected amount) before you act on it.
 - `Campay::DEMO_BASE_URL` and `Campay::LIVE_BASE_URL` constants.
 - `transactionHistory()` accepts `DateTimeInterface` objects.
 - `composer test`, `composer analyse` and `composer audit` scripts, and a PHPStan config at max level.
@@ -30,3 +32,4 @@
 - Fixed path injection in `getTransactionStatus()`: references such as `../withdraw` could redirect the authenticated request to another endpoint.
 - Requests always go to the configured base URL with redirects disabled, TLS verification on, and connect and total timeouts, even when a custom client is injected.
 - Removed the example `index.php` (loaded `.env`) and `webhook.php` (echoed unvalidated request input).
+- Webhook signatures only accept HS256 (`alg: none` and algorithm switching are rejected), are compared in constant time, and have `exp`, `nbf` and `iat` checked when present.

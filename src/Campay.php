@@ -7,6 +7,7 @@ namespace BlessDarah\PhpCampay;
 use BlessDarah\PhpCampay\Exceptions\ApiException;
 use BlessDarah\PhpCampay\Exceptions\AuthenticationException;
 use BlessDarah\PhpCampay\Exceptions\CampayException;
+use BlessDarah\PhpCampay\Exceptions\InvalidWebhookException;
 use BlessDarah\PhpCampay\Exceptions\ValidationException;
 use DateTimeImmutable;
 use DateTimeInterface;
@@ -25,7 +26,7 @@ class Campay
      * Campay references are UUIDs, but allow any simple identifier so that
      * nothing able to alter the request path (e.g. "../", "?", "#") gets through.
      */
-    private const string REFERENCE_PATTERN = '/^[A-Za-z0-9_-]{1,128}$/';
+    public const string REFERENCE_PATTERN = '/^[A-Za-z0-9_-]{1,128}$/';
 
     private const float TIMEOUT = 30.0;
     private const float CONNECT_TIMEOUT = 10.0;
@@ -123,6 +124,53 @@ class Campay
         }
 
         return $this->request('GET', 'transaction/' . rawurlencode($reference) . '/', null, 'Transaction status request');
+    }
+
+    /**
+     * Confirm a webhook notification against the Campay API before acting on it.
+     *
+     * The webhook signature does not prove the other fields were not altered or replayed,
+     * so this fetches the transaction and checks that its reference, status and amount match.
+     *
+     * @param WebhookEvent $event - A verified webhook from CampayWebhook::parse()
+     * @param int|float|string|null $expectedAmount - The amount your order expects, if any
+     * @throws InvalidWebhookException - When Campay's record does not match the webhook
+     * @throws ValidationException
+     * @throws ApiException
+     * @return array<mixed> - The decoded transaction from Campay
+     */
+    public function confirmTransaction(WebhookEvent $event, int|float|string|null $expectedAmount = null): array
+    {
+        $transaction = $this->decodeJson($this->getTransactionStatus($event->reference), 'Transaction status request');
+
+        $reference = $transaction['reference'] ?? $event->reference;
+        $status = $transaction['status'] ?? null;
+        $amount = $transaction['amount'] ?? null;
+
+        if (!is_scalar($reference) || (string) $reference !== $event->reference) {
+            throw new InvalidWebhookException('Webhook reference does not match the Campay transaction');
+        }
+
+        if ($status !== $event->status) {
+            throw new InvalidWebhookException('Webhook status does not match the Campay transaction');
+        }
+
+        if (!self::amountsMatch($amount, $event->amount)) {
+            throw new InvalidWebhookException('Webhook amount does not match the Campay transaction');
+        }
+
+        if ($expectedAmount !== null && !self::amountsMatch($amount, $expectedAmount)) {
+            throw new InvalidWebhookException('Campay transaction amount does not match the expected amount');
+        }
+
+        return $transaction;
+    }
+
+    private static function amountsMatch(mixed $actual, int|float|string $expected): bool
+    {
+        return is_numeric($actual)
+            && is_numeric($expected)
+            && abs((float) $actual - (float) $expected) < 0.00001;
     }
 
     /**
